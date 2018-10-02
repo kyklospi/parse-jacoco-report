@@ -10,4 +10,4 @@ Metrics are:
 * instruction coverage
 * complexity coverage
 
-Details about metrics can be read from EclEmma jacoco documentation here https://www.eclemma.org/jacoco/trunk/doc/counters.html
+Details about metrics can be read from EclEmma jacoco documentation here: https://www.eclemma.org/jacoco/trunk/doc/counters.html
