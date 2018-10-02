@@ -1,1 +1,13 @@
 # parse-jacoco-coverage
+
+A functionality to read JaCoCo report csv file, calculate the data to have the total percentage of different coverage metrics.
+
+Metrics are:
+
+* branch coverage
+* method coverage
+* line coverage
+* instruction coverage
+* complexity coverage
+
+Details about metrics can be read here https://www.eclemma.org/jacoco/trunk/doc/counters.html
