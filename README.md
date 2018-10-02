@@ -1,4 +1,4 @@
-# parse-jacoco-coverage
+# parse-jacoco-report
 
 A small functionality to read JaCoCo report csv file, calculate the data to have the total percentage of different coverage metrics.
 
