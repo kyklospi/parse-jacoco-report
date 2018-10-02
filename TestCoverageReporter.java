@@ -1,94 +1,37 @@
-import com.google.gson.Gson;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Class to report unit test coverage to datadog
+ * Class to parse test coverage from jacoco csv report
+ * and calculate the total percentage of coverage for different metrics
  */
-@Service
 public class TestCoverageReporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestCoverageReporter.class);
 
     public static void main(String[] args) {
-        File inputCoverage = new File("destinations-api-service/target/site/jacoco/jacoco.csv");
+        //the file path to jacoco csv
+        File inputCoverage = new File("/.../jacoco/jacoco.csv");
         List<TestCoverageCounter> coverageByClass = new ArrayList<>();
         TestTotalCoverageCounter totalCoveragePercentage = new TestTotalCoverageCounter();
         try {
             coverageByClass = readCoverageFromCsv(inputCoverage);
         } catch (IOException exception) {
-            LOGGER.info("Unable to read test coverage from csv file, report no coverage" + exception);
+            LOGGER.info("Unable to read test coverage from csv file, return no coverage" + exception);
         }
         if (!coverageByClass.isEmpty()) {
             totalCoveragePercentage = countTotalCoveragePercentage(coverageByClass);
         }
-        reportCoverageToDatadog(totalCoveragePercentage);
-    }
-
-    private static void reportCoverageToDatadog(TestTotalCoverageCounter coveragePercent) {
-        List<DatadogMetric> coverageMetrics = new ArrayList<>();
-        String metricPrefix = "unit.test.coverage.";
-        String branchName = System.getenv("BITBUCKET_BRANCH");
-        if (branchName == null || branchName.isEmpty()) {
-            branchName = "UNKNOWN";
-        }
-        String[] tag = {"branch", branchName};
-
-        DatadogMetric instruction = DatadogMetric.builder().type("GAUGE").tag(tag)
-                .name(metricPrefix + "instruction").value(String.valueOf(coveragePercent.getInstruction())).build();
-        coverageMetrics.add(instruction);
-        DatadogMetric branch = DatadogMetric.builder().type("GAUGE").tag(tag)
-                .name(metricPrefix + "branch").value(String.valueOf(coveragePercent.getBranch())).build();
-        coverageMetrics.add(branch);
-        DatadogMetric line = DatadogMetric.builder().type("GAUGE").tag(tag)
-                .name(metricPrefix + "line").value(String.valueOf(coveragePercent.getLine())).build();
-        coverageMetrics.add(line);
-        DatadogMetric complexity = DatadogMetric.builder().type("GAUGE").tag(tag)
-                .name(metricPrefix + "complexity").value(String.valueOf(coveragePercent.getComplexity())).build();
-        coverageMetrics.add(complexity);
-        DatadogMetric method = DatadogMetric.builder().type("GAUGE").tag(tag)
-                .name(metricPrefix + "method").value(String.valueOf(coveragePercent.getMethod())).build();
-        coverageMetrics.add(method);
-
-        sendMetricToDatadog(coverageMetrics);
-    }
-
-    private static void sendMetricToDatadog(List<DatadogMetric> coverageMetrics) {
-        Gson gson = new Gson();
-        StringEntity metricsString = null;
-        try {
-            metricsString = new StringEntity(gson.toJson(coverageMetrics));
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.warn("Can't parse metric: ", e.getMessage());
-        }
-
-        if (metricsString != null) {
-            HttpPost postReq = new HttpPost("https://xtracer.bonial.global/v1/api/messages");
-            postReq.addHeader("Content-Type", "application/json");
-            postReq.setEntity(metricsString);
-            try {
-                CloseableHttpClient httpClient = HttpClients.createDefault();
-                httpClient.execute(postReq);
-                httpClient.close();
-            } catch (Exception e) {
-                LOGGER.warn("Can't connect to datadog: ", e.getMessage());
-            }
-        }
+        return totalCoveragePercentage;
     }
 
     private static TestTotalCoverageCounter countTotalCoveragePercentage(List<TestCoverageCounter> coverageByClass) {
@@ -129,6 +72,7 @@ public class TestCoverageReporter {
         Pattern pattern = Pattern.compile(",");
         List<TestCoverageCounter> coverageByClass;
         try (BufferedReader in = new BufferedReader(new FileReader(csvFile))) {
+            //skips the first line because it contains column names
             coverageByClass = in.lines().skip(1).map(line -> {
                 String[] x = pattern.split(line);
                 return new TestCoverageCounter(
