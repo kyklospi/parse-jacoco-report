@@ -1,5 +1,3 @@
-package com.bonial.api.destinations.test;
-
 import com.google.gson.Gson;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -20,8 +18,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Created by atika.rachmawati on 13.09.18.
- * <p>
  * Class to report unit test coverage to datadog
  */
 @Service
