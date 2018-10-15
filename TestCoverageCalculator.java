@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * Class to parse test coverage from jacoco csv report
  * and calculate the total percentage of coverage for different metrics
  */
-public class TestCoverageReporter {
+public class TestCoverageCalculator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestCoverageReporter.class);
 
