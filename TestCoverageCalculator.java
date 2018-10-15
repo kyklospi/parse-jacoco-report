@@ -26,12 +26,16 @@ public class TestCoverageReporter {
         try {
             coverageByClass = readCoverageFromCsv(inputCoverage);
         } catch (IOException exception) {
-            LOGGER.info("Unable to read test coverage from csv file, return no coverage" + exception);
+            LOGGER.info("Unable to read test coverage from csv file, print no coverage" + exception);
         }
         if (!coverageByClass.isEmpty()) {
             totalCoveragePercentage = countTotalCoveragePercentage(coverageByClass);
         }
-        return totalCoveragePercentage;
+        System.out.println("Instruction coverage: " + totalCoveragePercentage.getInstruction() + "%");
+        System.out.println("Branch coverage: " + totalCoveragePercentage.getBranch() + "%");
+        System.out.println("Line coverage: " + totalCoveragePercentage.getLine() + "%");
+        System.out.println("Complexity coverage: " + totalCoveragePercentage.getComplexity() + "%");
+        System.out.println("Method coverage: " + totalCoveragePercentage.getMethod() + "%");
     }
 
     private static TestTotalCoverageCounter countTotalCoveragePercentage(List<TestCoverageCounter> coverageByClass) {
